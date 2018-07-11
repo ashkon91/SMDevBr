@@ -1,7 +1,7 @@
 let path = require('path');
 
 module.exports = {
-	entry: './app/index.js',
+	entry: ['babel-polyfill', './app/index.js'],
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, './dist/public'),
@@ -19,6 +19,14 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       },
       {
+        test: /\.scss$/,
+        use: [
+          {loader: 'style-loader'}, 
+          {loader: 'css-loader'}, 
+          {loader: 'sass-loader'}
+        ]
+      },
+      {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /node_modules/
@@ -31,7 +39,11 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: path.resolve(__dirname, 'dist/public')
+    contentBase: path.resolve(__dirname, 'dist/public'),
+    historyApiFallback: true,
+    proxy: {
+      '/api/**': 'http://localhost:3001'
+    },
   },
   mode: 'development'
 }
