@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "client": "cd client && npm start",
-    "api": "cd server && npm start",
+    "api": "export MY_CREDENTIALS=$(cat ../streamrunner-24c68-b8d900c17197.json) && cd server && npm start",
+    "env-setup": "export MY_CREDENTIALS=$(cat ../streamrunner-24c68-b8d900c17197.json)",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -2,10 +2,31 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const request = require('request-promise');
+const admin = require('firebase-admin');
 const port = 3001;
-// const promisePoller = require('promise-poller').default;
 
+//firebase init
+const serviceAccount = process.env.MY_CREDENTIALS;
+admin.initializeApp({
+	credential: admin.credential.cert(JSON.parse(serviceAccount)),
+	databaseURL: 'https://streamrunner-24c68.firebaseio.com/'
+})
+const db = admin.database();
+
+//middleware
 app.use(cors())
+
+app.get('/api/testPath', (req, res) => {
+	const rootNode = db.ref();
+	const tourNode = db.ref("tournaments");
+	const setNode = db.ref("sets");
+
+	rootNode.on('value', dataSnapshot => {
+		console.log(dataSnapshot.val(), 'its actually my shit this time i think');
+		const allData = dataSnapshot.val();
+		res.send({allData});
+	})
+})
 
 app.get('/api/setdata/:setId', (req, res) => {
 
@@ -45,12 +66,6 @@ app.get('/api/tournament/:url', (req, res) => {
 		json: true
 	}
 
-	// const checkSetQueue = (tournamentId, streamId) => {
-	// 	return new Promise((res, rej) => {
-			
-	// 	})
-	// }
-
 	request(tournamentIdOptions)
 		.then(response => {
 			const stationQueueOptions = {
@@ -89,6 +104,14 @@ app.get('/api/tournament/:url', (req, res) => {
 
 
 app.get('/api/tournament/:slug/stream/:streamName', (req, res) => {
+
+	const rootNode = db.ref();
+	const tourNode = db.ref("tournaments");
+	const setNode = db.ref("sets");
+
+	rootNode.on('value', dataSnapshot => {
+		console.log(dataSnapshot.val(), 'its actually my shit this time i think');
+	})
 
 	const payload = {
 		playerOne: 'Player One',
