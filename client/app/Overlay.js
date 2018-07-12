@@ -29,7 +29,7 @@ export default class Overlay extends Component<{}> {
 	}
 
 	getTournamentData = async (slug, streamName) => {
-		const response = await fetch('http://localhost:3001/api/tournament/' + slug + '/stream/' + streamName);
+		const response = await fetch('http://localhost:3001/api/test/tournament/' + slug + '/stream/' + streamName);
 		const body = await response.json();
 		return body;
 	}
