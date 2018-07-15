@@ -20,8 +20,8 @@ export default class Overlay extends Component<{}> {
 
 	pollTournamentEndpoint = (slug, streamName) => {
 		this.getTournamentData(slug, streamName)
-			.then(({payload}) => {
-				this.setState({roundInfo: payload.roundInfo, playerOne: payload.playerOne, playerTwo: payload.playerTwo})
+			.then(({playerOne, playerTwo, roundInfo}) => {
+				this.setState({roundInfo: roundInfo, playerOne: playerOne, playerTwo: playerTwo})
 			})
 			.catch(err => {
 				console.log(err);
