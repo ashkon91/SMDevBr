@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const request = require('request-promise');
 const admin = require('firebase-admin');
+const formatter = require('./utils/formatTournamentObject.js');
 const port = 3001;
 
 //firebase init
@@ -32,7 +33,6 @@ app.use(cors())
 const rootRef = db.ref();
 const userRef = db.ref("users");
 const tournamentRef = db.ref("tournaments");
-const setRef = db.ref("sets");
 
 app.get('/api/test/tournament/:slug/stream/:streamName', (req, res) => {
 
@@ -58,62 +58,88 @@ app.get('/api/test/tournament/:slug/stream/:streamName', (req, res) => {
 			}
 			request(stationQueueOptions)
 				.then(resp => {
-					//old api pinging code, remove or repurpose
+
+					//compose initial variables containing sgg api data to be restructured
 					const streams = resp.data.entities.stream;
 					const initQueues = resp.queues;
 					const players = resp.data.entities.entrants;
 					const initSets = resp.data.entities.sets;
+
+					//get my stream
 					const myStreamArr = streams.filter(stream => {
 						return stream.streamName.toUpperCase() === req.params.streamName.toUpperCase();
 					});
 					const myStream = myStreamArr[0];
-					const currentSetId = initQueues[myStream.id][0];
+					const nextSetId = initQueues[myStream.id][0];
 
-
-
-					//firebase test stuff
+					//firebase ref declarations
 					const tournamentKey = response.entities.tournament.id;
 					const tournRefKey = tournamentRef.child(tournamentKey);
 					// const updatedTournData = {};
 
 					//create new stream data object
-					const streamData = {};
-					for (let i = 0; i < streams.length; i++) {
-						let streamId = streams[i].id;
-						streamData[streamId] = streams[i].streamName;
-					}
+					const formattedStreams = formatter(streams, 'streams');
 
 					//create new formatted players object
-					const formattedPlayers = {};
-					for (let i = 0; i < players.length; i++) {
-						let playerObj = players[i];
-						formattedPlayers[playerObj.id] = playerObj.name;
-					}
+					const formattedPlayers = formatter(players, 'players');
 
 					//create new sets object
 					const formattedSets = {};
 					for (let i = 0; i < initSets.length; i++) {
 						let setObj = initSets[i];
-						formattedSets[setObj.id] = [setObj.entrant1Id, setObj.entrant2Id, setObj.fullRoundText];
+						let newObj = {};
+						newObj.playerOne = setObj.entrant1Id || 'Player 1';
+						newObj.playerTwo = setObj.entrant2Id || 'Player 2';
+						newObj.roundInfo = setObj.fullRoundText;
+						formattedSets[setObj.id] = newObj;
 					}
+					// const formattedSots = formatter(initSets, 'sets'); BORKED FOR SOME UNIDENTIFIABLE REASON
 
 					// updatedTournData["user/"+userId+"/tournaments/" + tournamentKey] = true;
 					// updatedTournData["tournaments/" + tournamentKey] = {
 					const updatedTournData = {
 						slug: req.params.slug,
-						streams: streamData,
+						streams: formattedStreams,
 						queues: initQueues,
 						players: formattedPlayers,
 						sets: formattedSets
 					};
 
-					// console.log(formattedSets);
-					tournRefKey.update(updatedTournData);
+					//construct set payload 
+					// --- WRITE UTIL FOR THIS CUZ WE'RE GONNA HAVE TO DO IT A LOT ---
+					const nextSet = formattedSets[nextSetId];
+					const {playerOne = 'Player One', playerTwo = 'Player Two'} = payload;
+					for (let key in nextSet) {
+						let playerId = nextSet[key];
+						payload[key] = formattedPlayers[playerId];
+					}
+					payload.roundInfo = nextSet.roundInfo;
 
-					// //3rd api call to get set data -- is this necessary? --
+					tournRefKey.update(updatedTournData, err => {
+						if (err) {
+							console.log('error updating tournament data');
+						} 
+						else {
+							console.log('tournament data uploaded successfully');
+							res.send(payload);
+						}
+					})
+
+
+
+
+
+
+
+
+
+
+
+
+					// //3rd api call to directly return data from the api to the client and render it, refactor this
 					// const setDataOptions = {
 					// 	method: 'GET',
-					// 	uri: 'https://api.smash.gg/set/' + currentSetId + '?expand%5B%5D=setTask',
+					// 	uri: 'https://api.smash.gg/set/' + nextSetId + '?expand%5B%5D=setTask',
 					// 	json: true
 					// }
 					// request(setDataOptions)
