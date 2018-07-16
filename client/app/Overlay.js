@@ -11,17 +11,33 @@ export default class Overlay extends Component<{}> {
 		this.state = {
 			roundInfo: null,
 			playerOne: null,
-			playerTwo: null
+			playerTwo: null,
+			tournamentId: null,
+			streamId: null
 		}
 	}
 
 	componentDidMount() {
 		//init socket.io connection
 		const server = socketIOClient(`http://192.168.1.90:3001`);
-		server.emit('initializeSR', {slug: this.props.match.params.slug, streamName: this.props.match.params.streamName});
+		this.state.tournamentId ? console.log('id already init') : server.emit('initializeSR', {slug: this.props.match.params.slug, streamName: this.props.match.params.streamName});
+		
+		server.on('initialized', payload => {
+			this.setState(payload);
+			this.startPolling(server);
+		});
+
+		server.on('updated', payload => {
+			this.setState(payload);
+		})
+
 
 		//express api init endpoint
-		this.pollTournamentEndpoint(this.props.match.params.slug, this.props.match.params.streamName);
+		// this.pollTournamentEndpoint(this.props.match.params.slug, this.props.match.params.streamName);
+	}
+
+	startPolling = server => {
+		let polling = setInterval(() => {server.emit('poll', this.state.tournamentId)}, 60000)
 	}
 
 	pollTournamentEndpoint = (slug, streamName) => {
