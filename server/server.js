@@ -108,67 +108,33 @@ app.get('/api/test/tournament/:slug/stream/:streamName', (req, res) => {
 					//construct set payload 
 					// --- WRITE UTIL FOR THIS CUZ WE'RE GONNA HAVE TO DO IT A LOT ---
 					const nextSet = formattedSets[nextSetId];
-					const {playerOne = 'Player One', playerTwo = 'Player Two'} = payload;
+					const {playerOne = 'Player One', playerTwo = 'Player Two', roundInfo = 'Bracket'} = payload;
 					for (let key in nextSet) {
 						let playerId = nextSet[key];
 						payload[key] = formattedPlayers[playerId];
 					}
 					payload.roundInfo = nextSet.roundInfo;
 
+					//write tournament object to firebase
 					tournRefKey.update(updatedTournData, err => {
 						if (err) {
-							console.log('error updating tournament data');
+							res.sendStatus(500);
 						} 
 						else {
 							console.log('tournament data uploaded successfully');
 							res.send(payload);
-						}
-					})
+						}});
 
-
-
-
-
-
-
-
-
-
-
-
-					// //3rd api call to directly return data from the api to the client and render it, refactor this
-					// const setDataOptions = {
-					// 	method: 'GET',
-					// 	uri: 'https://api.smash.gg/set/' + nextSetId + '?expand%5B%5D=setTask',
-					// 	json: true
-					// }
-					// request(setDataOptions)
-					// 	.then(response => {
-					// 		const set = response.entities.sets;
-					// 		const entrants = resp.data.entities.entrants;
-					// 		const players = entrants.filter(entrant => {
-					// 			return entrant.id === set.entrant1Id || entrant.id === set.entrant2Id;
-					// 		})
-
-					// 		payload.roundInfo = response.entities.sets.fullRoundText;
-					// 		payload.playerOne = players[0].name;
-					// 		payload.playerTwo = players[1].name;
-
-					// 		res.send({payload})
-					// 	})
-					// 	.catch(error => {
-					// 		res.send({message: 'error with set data api call', error: error})
-					// 	})
 
 				})
 				.catch(err => {
 					console.log(err);
-					res.send({message: 'error with station queue api call', error: err});
+					res.sendStatus(500);
 				})
 		})
 		.catch(err => {
 			console.log(err);
-			res.send({message: 'error with tournament slug api call', error: err});
+			res.sendStatus(500);
 		});
 
 
@@ -190,51 +156,6 @@ app.get('/api/setdata/:setId', (req, res) => {
 			console.log(error);
 			res.send({message: 'error with set data api call'})
 		})
-});
-
-
-
-/*
-*
-*
-* * * * LANDING NO AUTH ENDPOINT * * * *
-*
-*
-*/
-
-
-
-app.get('/api/tournament/:url', (req, res) => {
-
-	const tournamentIdOptions = {
-		method: 'GET',
-		uri: 'https://api.smash.gg/tournament/' + req.params.url,
-		json: true
-	}
-
-	request(tournamentIdOptions)
-		.then(response => {
-			const stationQueueOptions = {
-				method: 'GET',
-				uri: 'https://api.smash.gg/station_queue/' + response.entities.tournament.id,
-				json: true
-			}
-
-			request(stationQueueOptions)
-				.then(resp => {
-					const streams = resp.data.entities.stream
-
-					res.send({streams});
-				})
-				.catch(err => {
-					console.log(err);
-					res.send({message: 'error with station queue api call'});
-				})
-		})
-		.catch(err => {
-			console.log(err);
-			res.send({message: 'error with tournament slug api call'});
-		});
 });
 
 
@@ -316,6 +237,36 @@ app.get('/api/tournament/:slug/stream/:streamName', (req, res) => {
 		});
 });
 
-app.listen(port, () => {
-	console.log(`its bonertime on port ${port} bros`)
+
+
+/*
+*
+*
+* * * SOCKET.IO * * *
+*
+*
+*/
+
+
+
+const server = app.listen(port, () => {
+	console.log(`its bonertime on port ${port} bros`);
 });
+
+const io = require('socket.io')(server);
+
+io.on('connection', socket => {
+	console.log(`initializing streamrunner on socket ${socket.id}`);
+	socket.on('initializeSR', async ({slug, streamName}) => {
+		console.log(`fetching data for tournament ${slug} and stream ${streamName}`);
+		// const 
+
+	});
+});
+
+
+
+
+
+
+

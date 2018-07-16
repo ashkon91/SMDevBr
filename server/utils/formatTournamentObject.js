@@ -21,9 +21,6 @@ module.exports = formatter = (arr, type) => {
 
 		for (let i = 0; i < arr.length; i++) {
 			let ind = arr[i];
-			// let p1 = ind.entrant1Id || 'Player 1';
-			// let p2 = ind.entrant2Id || 'Player 2';
-			// let r = 'fullRoundText';
 			formattedObj[ind.id] = [ind.player1Id, ind.player2Id, ind.fullRoundText];
 		}
 		return formattedObj;

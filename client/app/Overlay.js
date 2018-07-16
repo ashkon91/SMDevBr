@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import socketIOClient from 'socket.io-client';
 import Nameplate from './Nameplate';
 import Round from './Round';
 import './_root.scss';
@@ -15,6 +16,11 @@ export default class Overlay extends Component<{}> {
 	}
 
 	componentDidMount() {
+		//init socket.io connection
+		const server = socketIOClient(`http://192.168.1.90:3001`);
+		server.emit('initializeSR', {slug: this.props.match.params.slug, streamName: this.props.match.params.streamName});
+
+		//express api init endpoint
 		this.pollTournamentEndpoint(this.props.match.params.slug, this.props.match.params.streamName);
 	}
 
