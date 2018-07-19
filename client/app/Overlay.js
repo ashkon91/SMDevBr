@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
-import socketIOClient from 'socket.io-client';
-import { rootRef, tournamentRef } from './firebase.js';
+import { db } from './firebase/index.js';
 import Nameplate from './Nameplate';
 import Round from './Round';
 import './_root.scss';
 
 export default class Overlay extends Component<{}> {
 	constructor(props) {
-		super()
+		super(props)
 
 		this.state = {
 			roundInfo: null,
@@ -19,7 +18,7 @@ export default class Overlay extends Component<{}> {
 			pollAttempts: 0
 		}
 
-		this.myTournamentRef = tournamentRef.child(props.match.params.tournamentId);
+		this.myTournamentRef = db.tournamentRef.child(props.match.params.tournamentId);
 	}
 
 	componentDidMount() {

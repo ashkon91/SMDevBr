@@ -1,5 +1,6 @@
 import { firebase } from '@firebase/app';
 import '@firebase/database';
+import '@firebase/auth';
 
 const config = {
 	apiKey: "AIzaSyCRun2iuUvUYsdwwvK2wVhMc8jCHx88MPA",
@@ -10,9 +11,10 @@ const config = {
 	messagingSenderId: "547286407961"
 };
 
-firebase.initializeApp(config);
+if (!firebase.apps.length) {
+	firebase.initializeApp(config);
+}
 
-const db = firebase.database();
+export const auth = firebase.auth();
 
-export const rootRef = db.ref();
-export const tournamentRef = db.ref('tournaments');
+export const db = firebase.database();
