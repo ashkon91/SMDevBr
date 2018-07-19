@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import socketIOClient from 'socket.io-client';
+import { rootRef, tournamentRef } from './firebase.js';
 import Nameplate from './Nameplate';
 import Round from './Round';
 import './_root.scss';
@@ -12,51 +13,60 @@ export default class Overlay extends Component<{}> {
 			roundInfo: null,
 			playerOne: null,
 			playerTwo: null,
-			tournamentId: null,
-			streamId: null
+			tournamentId: props.match.params.tournamentId,
+			streamId: props.match.params.streamId,
+			slug: props.match.params.slug,
+			pollAttempts: 0
 		}
+
+		this.myTournamentRef = tournamentRef.child(props.match.params.tournamentId);
 	}
 
 	componentDidMount() {
-		//init socket.io connection
-		const server = socketIOClient(`http://192.168.1.90:3001`);
-		this.state.tournamentId ? console.log('id already init') : server.emit('initializeSR', {slug: this.props.match.params.slug, streamName: this.props.match.params.streamName});
-		
-		server.on('initialized', payload => {
-			this.setState(payload);
-			this.startPolling(server);
+		//create firebase listeners
+		this.myTournamentRef.on('child_changed', snapshot => {
+			if (snapshot.key == 'streams') {
+				this.newPayload(snapshot.val());
+			}
 		});
 
-		server.on('updated', payload => {
-			this.setState(payload);
-		})
-
-
 		//express api init endpoint
-		// this.pollTournamentEndpoint(this.props.match.params.slug, this.props.match.params.streamName);
+		this.state.roundInfo ? console.log('initTournament was not run') : this.initTournament(this.props.match.params.tournamentId, this.props.match.params.streamId, this.props.match.params.slug);
+	}
+
+	newPayload = snap => {
+		let streamId = this.state.streamId;
+		let payload = snap[streamId][0];
+		this.setState(payload);
 	}
 
 	startPolling = server => {
-		let polling = setInterval(() => {server.emit('poll', this.state.tournamentId)}, 60000)
+		let polling = setInterval(() => {
+			fetch('http://localhost:3001/api/poll/' + this.state.tournamentId);
+			this.setState({pollAttempts: this.state.pollAttempts + 1}, () => {console.log(`smashgg has been polled ${this.state.pollAttempts} times`)});
+		}, 60000);
 	}
 
-	pollTournamentEndpoint = (slug, streamName) => {
-		this.getTournamentData(slug, streamName)
-			.then(({playerOne, playerTwo, roundInfo}) => {
-				this.setState({roundInfo: roundInfo, playerOne: playerOne, playerTwo: playerTwo})
+	initTournament = (tournamentId, streamId, slug) => {
+		this.getTournamentData(tournamentId, streamId, slug)
+			.then((payload) => {
+				this.setState(payload, () => {
+					this.startPolling();
+				});
 			})
 			.catch(err => {
 				console.log(err);
 			});
 	}
 
-	getTournamentData = async (slug, streamName) => {
-		const response = await fetch('http://localhost:3001/api/test/tournament/' + slug + '/stream/' + streamName);
+	getTournamentData = async (tournamentId, streamId, slug) => {
+		const response = await fetch('http://localhost:3001/api/init/' + tournamentId + '/tournament/' + slug + '/stream/' + streamId);
 		const body = await response.json();
 		return body;
 	}
 
 	render() {
+		console.log('rendered');
 		return(
 			<div className="overlay">
 				<Nameplate playerName={this.state.playerOne} color='white' xPos='500px'/>

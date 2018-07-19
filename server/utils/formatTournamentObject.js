@@ -1,31 +1,27 @@
-module.exports = formatter = (arr, type) => {
-
-	const types = {
-		streams: 'streamName',
-		players: 'name',
-		sets: ['player1Id', 'player2Id', 'fullRoundText']
-	}
-	const formattedObj = {};
-
-	if (type == 'streams' || 'players') {
-
-		const desiredKey = types[type];
-
-		for (let i = 0; i < arr.length; i++) {
-			let ind = arr[i];
-			formattedObj[ind.id] = ind[desiredKey];
+module.exports = formatter = (queue, sets, players) => {	
+	const pL = {};
+	const qCopy = Object.assign({}, queue);
+	for (let key in qCopy) {
+		let pArr = [];
+		for (let i = 0; i < qCopy[key].length; i++) {
+			let pKey = key;
+			sets.forEach(set => {
+				if (set.id == qCopy[key][i]) {
+					let pObj = {playerOne: 'Player One', playerTwo: 'Player Two', roundInfo: 'Bracket'};
+					players.forEach(player => {
+						if (player.id == set.entrant1Id) {
+							pObj.playerOne = player.name;
+						}
+						else if (player.id == set.entrant2Id) {
+							pObj.playerTwo = player.name;
+						}
+					})
+					pObj.roundInfo = set.fullRoundText;
+					pArr.push(pObj);
+				}
+			})
+			pL[pKey] = pArr;
 		}
-		return formattedObj;
 	}
-	else if (type == 'sets') {
-
-		for (let i = 0; i < arr.length; i++) {
-			let ind = arr[i];
-			formattedObj[ind.id] = [ind.player1Id, ind.player2Id, ind.fullRoundText];
-		}
-		return formattedObj;
-	}
-	else {
-		throw new Error(`Formatter type parameter "${type}" is invalid`);
-	}
+	return pL;
 }

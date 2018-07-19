@@ -1,10 +1,10 @@
 import React from 'react';
 import StreamInfo from './StreamInfo';
 
-const SelectStream = ({streams, tournamentSlug}) => (
+const SelectStream = ({streams, tournamentId, slug}) => (
 	<ul>
 		{streams.map((data, i) => {
-			return <StreamInfo key={i} tournamentSlug={tournamentSlug} {...data} />
+			return <StreamInfo key={i} tournamentId={tournamentId} slug={slug} {...data} />
 		})}
 	</ul>
 )

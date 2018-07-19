@@ -17,7 +17,7 @@ export default class App extends Component<{}> {
 		return(
 			<div>
 				<Route path="/streamrunner" exact component={Landing} />
-				<Route path="/streamrunner/:slug/:streamName" exact component={Overlay} />
+				<Route path="/streamrunner/:slug/:tournamentId/:streamId" exact component={Overlay} />
 			</div>
 		)
 	}

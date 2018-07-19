@@ -16,6 +16,7 @@
   "homepage": "https://github.com/ashkon91/SMDevBr#readme",
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "firebase": "^5.2.0",
     "react": "^16.3.1",
     "react-dom": "^16.3.1",
     "react-redux": "^5.0.7",

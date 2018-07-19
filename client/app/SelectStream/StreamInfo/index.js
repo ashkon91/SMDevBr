@@ -1,9 +1,9 @@
 import React from 'react';
 
-const StreamInfo = ({tournamentSlug, streamName}) => (
+const StreamInfo = ({tournamentId, id, streamName, slug}) => (
 		<li>
 			<a
-				href={`/streamrunner/${tournamentSlug}/${streamName}`}
+				href={`/streamrunner/${slug}/${tournamentId}/${id}`}
 			>	
 				{streamName}
 			</a>

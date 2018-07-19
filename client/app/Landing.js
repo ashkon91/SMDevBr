@@ -1,24 +1,24 @@
 import React, { Component } from 'react';
-import request from 'superagent';
 import 'babel-polyfill';
 import SelectStream from './SelectStream';
 
 export default class Landing extends Component<{}> {
 	constructor(props) {
 		super(props)
-		this.tournamentSlug = React.createRef();
+		this.slug = React.createRef();
 
 		this.state = {
-			tournamentSlug: null,
-			streamList: null
+			slug: null,
+			streams: null,
+			tournamentId: null
 		}
 	}
 
 	getStreamStations = () => {
-		const slug = this.tournamentSlug.current.value;
+		const slug = this.slug.current.value;
 		this.generateStreamStations()
-      .then(({streams}) => {
-      	this.setState({tournamentSlug: slug, streamList: streams})
+      .then(({streams, tournamentId}) => {
+      	this.setState({slug: slug, tournamentId: tournamentId, streams: streams});
       })
       .catch((err) => {
       	console.log(err);
@@ -26,7 +26,7 @@ export default class Landing extends Component<{}> {
 	}
 
 	generateStreamStations = async () => {
-    const response = await fetch('http://localhost:3001/api/tournament/'+this.tournamentSlug.current.value);
+    const response = await fetch('http://localhost:3001/api/tournament/'+this.slug.current.value);
     const body = await response.json();
     return body;
   }
@@ -40,7 +40,7 @@ export default class Landing extends Component<{}> {
 
 	render() {
 
-		const streamDropdown = this.state.streamList ? <SelectStream streams={this.state.streamList} tournamentSlug={this.state.tournamentSlug}/> : null;
+		const streamDropdown = this.state.streams ? <SelectStream {...this.state} /> : null;
 
 		return(
 			<div
@@ -50,7 +50,7 @@ export default class Landing extends Component<{}> {
 				<input 
 					type="text" 
 					placeholder="Tournament Slug"
-					ref={this.tournamentSlug}
+					ref={this.slug}
 					onKeyDown={this.keyPress}
 				/>
 				<button
