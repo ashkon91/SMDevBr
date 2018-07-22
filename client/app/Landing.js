@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import 'babel-polyfill';
 import SelectStream from './SelectStream';
+import SignUp from './SignUp';
 
 export default class Landing extends Component<{}> {
 	constructor(props) {
@@ -46,6 +47,7 @@ export default class Landing extends Component<{}> {
 			<div
 				style={{margin: '20px', padding: '10px', border: '1px solid black'}}
 			>
+				<SignUp />
 				<p>Copy and paste the tournament's slug from Smash.gg. The slug can be found by visiting your tournament's Smash.gg page and checking the URL -> "http://smash.gg/tournament/<span style={{color: 'red'}}>YOUR-SLUG-HERE</span>"!</p>
 				<input 
 					type="text" 
