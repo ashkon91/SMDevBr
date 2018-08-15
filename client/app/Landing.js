@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import 'babel-polyfill';
 import SelectStream from './SelectStream';
 import SignUp from './SignUp';
+import SignIn from './SignIn';
 
 export default class Landing extends Component<{}> {
 	constructor(props) {
@@ -9,6 +10,7 @@ export default class Landing extends Component<{}> {
 		this.slug = React.createRef();
 
 		this.state = {
+			signIn: false,
 			slug: null,
 			streams: null,
 			tournamentId: null
@@ -42,12 +44,20 @@ export default class Landing extends Component<{}> {
 	render() {
 
 		const streamDropdown = this.state.streams ? <SelectStream {...this.state} /> : null;
+		const formSwitchText = this.state.signIn ? "Don't have an account?" : "Already have an account?";
+		const whichForm = this.state.signIn ? <SignIn /> : <SignUp />
 
 		return(
 			<div
 				style={{margin: '20px', padding: '10px', border: '1px solid black'}}
 			>
-				<SignUp />
+				<a 
+					href="javascript:;"
+					onClick={() => this.setState({signIn: !this.state.signIn})}
+				>
+					{formSwitchText}
+				</a>
+				{whichForm}
 				<p>Copy and paste the tournament's slug from Smash.gg. The slug can be found by visiting your tournament's Smash.gg page and checking the URL -> "http://smash.gg/tournament/<span style={{color: 'red'}}>YOUR-SLUG-HERE</span>"!</p>
 				<input 
 					type="text" 

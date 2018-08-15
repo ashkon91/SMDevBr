@@ -3,8 +3,7 @@ import SignUpForm from './SignUpForm';
 
 const SignUp = () => {
 	return(
-		<div
-		>
+		<div>
 			<h2>Sign up!</h2>
 			<SignUpForm />
 			<hr />

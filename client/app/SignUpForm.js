@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { auth } from './firebase/index.js';
+import { auth as authObj } from './firebase/firebase.js'
 
 const formatPropAsKey = (key, value) => {
 	return {[key]: value}
@@ -24,6 +25,7 @@ export default class SignUpForm extends Component<{}> {
 		auth.createUser(this.state.email, this.state.passwordOne)
 			.then(user => {
 				console.log(user);
+				auth.auth.currentUser.updateProfile(formatPropAsKey('displayName', this.state.username))
 				this.setState({...initialState});
 			})
 			.catch(err => {

@@ -1,5 +1,7 @@
 import { auth } from './firebase.js';
 
+export { auth };
+
 export const createUser = (email, password) => auth.createUserWithEmailAndPassword(email, password);
 
 export const signInUser = (email, password) => auth.signInWithEmailAndPassword(email, password);
